@@ -20,6 +20,12 @@ public class Product {
 		ExitDate = exitDate;
 	}
 
+	@Override
+	public String toString() {
+		return "Product [ProductName=" + ProductName + ", Quantity=" + Quantity + ", PricePerUnit=" + PricePerUnit
+				+ ", ExitDate=" + ExitDate + "]";
+	}
+
 	public String getProductName() {
 		return ProductName;
 	}
