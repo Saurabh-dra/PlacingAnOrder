@@ -7,7 +7,7 @@ import java.util.Map;
 import com.cg.drinkndelight.placeorder.beans.RawMaterial;
 import com.cg.drinkndelight.placeorder.dao.RawMaterialDao;
 import com.cg.drinkndelight.placeorder.dao.RawMaterialDaoImpl;
-import com.cg.drinkndelight.placeorder.exception.InvalidInputExpection;
+import com.cg.drinkndelight.placeorder.exception.InvalidInputException;
 
 public class RawMaterialServices {
 	private RawMaterialDao rawmaterialDao;
@@ -17,11 +17,11 @@ public class RawMaterialServices {
 	}
 
 	// adding the raw material one by one
-	public void addRawMaterial(RawMaterial rawMaterial) throws InvalidInputExpection {
+	public void addRawMaterial(RawMaterial rawMaterial) throws InvalidInputException {
 		LocalDate now = LocalDate.now();
 		Period diff = Period.between(now, rawMaterial.getDateOfDelivery());
 		if (diff.getMonths() > 2 || rawMaterial.getDateOfDelivery().isBefore(now)) {
-			throw new InvalidInputExpection("Date is out of Bound");
+			throw new InvalidInputException("Date is out of Bound");
 		} else {
 			rawmaterialDao.addRawMAtertial(rawMaterial);
 		}

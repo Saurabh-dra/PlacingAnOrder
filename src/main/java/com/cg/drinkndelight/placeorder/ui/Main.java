@@ -15,7 +15,7 @@ import com.cg.drinkndelight.placeorder.util.RawMaterialMenu;
 import com.cg.drinkndelight.placeorder.services.ProductServices;
 import com.cg.drinkndelight.placeorder.beans.Product;
 import com.cg.drinkndelight.placeorder.beans.RawMaterial;
-import com.cg.drinkndelight.placeorder.exception.InvalidInputExpection;
+import com.cg.drinkndelight.placeorder.exception.InvalidInputException;
 
 public class Main {
 	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -24,7 +24,7 @@ public class Main {
 	RawMaterialMenu rmMenu = new RawMaterialMenu();
 	ProductMenu proMenu = new ProductMenu();
 
-	public static void main(String[] args) throws IOException, InvalidInputExpection {
+	public static void main(String[] args) throws IOException, InvalidInputException {
 		Main obj = new Main();
 		System.out.println("**** Welcome to Drink & Delight ****");
 
@@ -33,7 +33,7 @@ public class Main {
 	}
 
 	// method to chose to order raw material or product
-	public void selectSystem() throws IOException, InvalidInputExpection {
+	public void selectSystem() throws IOException, InvalidInputException {
 		System.out.println("Select Your System:");
 		int flag = 1;
 		while (flag == 1) {
@@ -75,7 +75,7 @@ public class Main {
 					flag = 0;
 					break;
 				default:
-					System.out.println("\n*Wrong Choice*\n");
+					System.out.println("\n *Wrong Choice* \n");
 					break;
 				}
 			}
@@ -83,7 +83,7 @@ public class Main {
 	}
 
 	// Raw Material Manager
-	public void selectRawMaterialOperation() throws IOException, InvalidInputExpection {
+	public void selectRawMaterialOperation() throws IOException, InvalidInputException {
 		System.out.println("Select your Operation:");
 		int flag = 1;
 		while (flag == 1) {
@@ -96,37 +96,44 @@ public class Main {
 				switch (choice) {
 				// add item
 				case "1":
+					List<String> rawMenu;
 					int quantity = 0;
 					double pricePerUnit = 0;
 					System.out.println("Enter Raw Material Name:");
 					String rawName = br.readLine();
-					if (rawName.isEmpty()) {
-						System.out.println("Name cannot be empty\n");
+					rawMenu = rmMenu.rawmaterialMenu();
+					if (rawName.isEmpty() || !rawMenu.contains(rawName)) {
+						System.out.println("Raw Material name is empty or Material not found\n");
 						selectRawMaterialOperation();
+						continue;
 					}
 					System.out.println("Enter Supplier ID:");
 					String supplierID = br.readLine();
-					if (supplierID.isEmpty()) {
+					rawMenu = rmMenu.supplierMenu();
+					if (supplierID.isEmpty() || !rawMenu.contains(supplierID)) {
 						System.out.println("Choose a Supplier Please\n");
 						selectRawMaterialOperation();
+						continue;
 					}
 					System.out.println("Enter Warehouse ID:");
 					String warehouseID = br.readLine();
-					if (warehouseID.isEmpty()) {
+					rawMenu = rmMenu.warehouseMenu();
+					if (warehouseID.isEmpty() || !rawMenu.contains(warehouseID)) {
 						System.out.println("Choose a Warehouse Please\n");
 						selectRawMaterialOperation();
+						continue;
 					}
 					System.out.println("Enter Quantity/Unit of Purchase:");
 					try {
 						quantity = Integer.parseInt(br.readLine());
-					} catch (Exception e) {
-						System.out.println(e.getMessage());
+					} catch (NumberFormatException e) {
+						System.out.println("Quantity must be an Integer");
 						selectRawMaterialOperation();
 					}
 					System.out.println("Enter Price per Unit:");
 					try {
 						pricePerUnit = Double.parseDouble(br.readLine());
-					} catch (Exception e) {
+					} catch (NumberFormatException e) {
 						System.out.println(e.getMessage());
 						selectRawMaterialOperation();
 					}
@@ -139,9 +146,16 @@ public class Main {
 					} catch (DateTimeParseException e) {
 						System.out.println(e.getMessage());
 						selectRawMaterialOperation();
+						continue;
 					}
-					rawmaterialservices.addRawMaterial(
-							new RawMaterial(rawName, supplierID, warehouseID, quantity, pricePerUnit, DateOfDelivery));
+					try {
+						rawmaterialservices.addRawMaterial(new RawMaterial(rawName, supplierID, warehouseID, quantity,
+								pricePerUnit, DateOfDelivery));
+					} catch (InvalidInputException e) {
+						System.out.println(e.getMessage());
+						selectRawMaterialOperation();
+						continue;
+					}
 					break;
 				// display
 				case "2":
@@ -153,7 +167,7 @@ public class Main {
 					flag = 0;
 					break;
 				default:
-					System.out.println("\\n*Wrong Choice*\\n");
+					System.out.println("\n *Wrong Choice* \n");
 					break;
 				}
 			}
@@ -161,7 +175,7 @@ public class Main {
 	}
 
 	// Product Order Manager
-	public void selectProductOperation() throws IOException, InvalidInputExpection {
+	public void selectProductOperation() throws IOException, InvalidInputException {
 		System.out.println("Select your Operation:");
 		int flag = 1;
 		while (flag == 1) {
@@ -176,16 +190,19 @@ public class Main {
 				case "1":
 					System.out.println("Enter Product Name:");
 					String productName = br.readLine();
-					if (productName.isEmpty()) {
-						System.out.println("Product Name cannot be empty\n");
+					List<String> proList;
+					proList = proMenu.productMenu();
+					if (productName.isEmpty() || !proList.contains(productName)) {
+						System.out.println("Product Name empty or product not found\n");
 						selectProductOperation();
+						continue;
 					}
 					System.out.println("Enter Quantity/Unit of Purchase:");
 					int quantity = 0;
 					try {
 						quantity = Integer.parseInt(br.readLine());
 					} catch (Exception e) {
-						System.out.println(e.getMessage());
+						System.out.println("Quantity must be an Integer");
 						selectProductOperation();
 					}
 					System.out.println("Enter Price per Unit:");
@@ -193,7 +210,7 @@ public class Main {
 					try {
 						pricePerUnit = Double.parseDouble(br.readLine());
 					} catch (Exception e) {
-						System.out.println(e.getMessage());
+						System.out.println("Enter a valid amount");
 						selectProductOperation();
 					}
 					System.out.println("Enter Date of Delivery:");
@@ -203,11 +220,17 @@ public class Main {
 					try {
 						ExitDate = LocalDate.parse(sDate, formatter);
 					} catch (DateTimeParseException e) {
+						System.out.println("Enter date in dd/mm/yyyy format only");
+						selectProductOperation();
+						continue;
+					}
+					try {
+						productServices.addProduct(new Product(productName, pricePerUnit, quantity, ExitDate));
+					} catch (InvalidInputException e) {
 						System.out.println(e.getMessage());
 						selectProductOperation();
+						continue;
 					}
-
-					productServices.addProduct(new Product(productName, pricePerUnit, quantity, ExitDate));
 					break;
 				case "2": // display
 					Map<String, Product> pList = productServices.displayProduct();
@@ -218,7 +241,7 @@ public class Main {
 					flag = 0;
 					break;
 				default:
-					System.out.println("\\n*Wrong Choice*\\n");
+					System.out.println("\n *Wrong Choice* \n");
 					break;
 				}
 			}

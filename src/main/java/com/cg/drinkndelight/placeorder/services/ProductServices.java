@@ -7,7 +7,7 @@ import java.util.Map;
 import com.cg.drinkndelight.placeorder.beans.Product;
 import com.cg.drinkndelight.placeorder.dao.ProductDao;
 import com.cg.drinkndelight.placeorder.dao.ProductDaoImpl;
-import com.cg.drinkndelight.placeorder.exception.InvalidInputExpection;
+import com.cg.drinkndelight.placeorder.exception.InvalidInputException;
 
 public class ProductServices {
 	private ProductDao productDao;
@@ -17,11 +17,11 @@ public class ProductServices {
 	}
 
 	/// adding the products one by one
-	public void addProduct(Product product) throws InvalidInputExpection {
+	public void addProduct(Product product) throws InvalidInputException {
 		LocalDate now = LocalDate.now();
 		Period diff = Period.between(now, product.geExitDate());
 		if (diff.getMonths() > 2 || product.geExitDate().isBefore(now)) {
-			throw new InvalidInputExpection("Date is out of Bound");
+			throw new InvalidInputException("Date is out of Bound");
 		} else {
 			productDao.addProductList(product);
 		}
